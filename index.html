@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R.V_WEB3 | Carteira Web3</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #1E2026; color: #fff; min-height: 100vh; }
+        header { background: #1B1E25; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2B3139; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #F3BA2F; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        h1 span { color: #F3BA2F; }
+        p { color: #B7BDC6; font-size: 1.1rem; margin-bottom: 2rem; }
+        .buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+        button { padding: 0.875rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-primary { background: #F3BA2F; color: #000; }
+        .btn-primary:hover { background: #e6ac1a; }
+        .btn-secondary { background: #2B3139; color: #fff; border: 1px solid #474D57; }
+        .btn-secondary:hover { border-color: #F3BA2F; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .card { background: #2B3139; padding: 1.5rem; border-radius: 10px; border: 1px solid #383E47; }
+        .card h3 { color: #F3BA2F; margin-bottom: 0.5rem; }
+        .warning { background: rgba(243, 186, 47, 0.1); border: 1px solid #F3BA2F; padding: 1rem; border-radius: 8px; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">💰 R.V_WEB3</div>
+    </header>
+
+    <div class="container">
+        <h1>Bem-vindo à sua <span>Carteira Web3</span></h1>
+        <p>Interface profissional inspirada na Binance. Segura, rápida e conectada com todo o ecossistema Web3.</p>
+
+        <div class="buttons">
+            <button class="btn-primary" onclick="criarCarteira()">✨ Criar Carteira</button>
+            <button class="btn-secondary" onclick="importarFrase()">🔑 Importar com 12 Palavras</button>
+            <button class="btn-secondary" onclick="importarChave()">🔒 Importar com Chave Privada</button>
+            <button class="btn-secondary" onclick="conectarMetaMask()">🦊 Conectar MetaMask</button>
+            <button class="btn-secondary" onclick="conectarBinance()">🟡 Conectar Binance Web3</button>
+            <button class="btn-secondary" onclick="conectarTrust()">💙 Conectar Trust Wallet</button>
+        </div>
+
+        <div class="features">
+            <div class="card">
+                <h3>🔑 Importação Segura</h3>
+                <p>Use frase de 12 palavras ou chave privada para acessar sua carteira.</p>
+            </div>
+            <div class="card">
+                <h3>🔗 Multiplataforma</h3>
+                <p>Conecte com MetaMask, Binance Web3, Trust Wallet e muito mais.</p>
+            </div>
+            <div class="card">
+                <h3>🛡️ Segurança Total</h3>
+                <p>Suas chaves nunca saem do seu dispositivo. Tudo processado localmente.</p>
+            </div>
+            <div class="card">
+                <h3>💱 Enviar e Receber</h3>
+                <p>Transfira e receba criptoativos em diversas redes com facilidade.</p>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ AVISO DE SEGURANÇA:</strong> Nunca compartilhe sua frase de 12 palavras ou chave privada com ninguém! Perdas por vazamento são irreversíveis. Armazene em local seguro e offline.
+        </div>
+    </div>
+
+    <script>
+        function criarCarteira() { alert('Função em desenvolvimento: Criar Carteira'); }
+        function importarFrase() { alert('Função em desenvolvimento: Importar com 12 Palavras'); }
+        function importarChave() { alert('Função em desenvolvimento: Importar com Chave Privada'); }
+        function conectarMetaMask() { alert('Função em desenvolvimento: Conectar MetaMask'); }
+        function conectarBinance() { alert('Função em desenvolvimento: Conectar Binance Web3'); }
+        function conectarTrust() { alert('Função em desenvolvimento: Conectar Trust Wallet'); }
+    </script>
+</body>
+</html>
