@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#06100f">
+<meta name="description" content="rv.web3 — Painel de inteligência global e Carteira Web3">
+<title>rv.web3 — Inteligência Global · Carteira Web3</title>
+<style>
+:root{--bg:#050b12;--panel:rgba(8,20,27,.82);--line:rgba(65,222,180,.19);--green:#22e59a;--cyan:#31d5dc;--gold:#c9b65f;--yellow:#F3BA2F;--muted:#78918e;--text:#e4f5ef;--card:#2B3139;--card-border:#383E47}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+body{overflow-x:hidden;background:radial-gradient(ellipse at 50% 70%,#073a35 0%,#071923 37%,#050a12 75%)}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{min-height:100vh;position:relative;isolation:isolate}
+.app:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(120deg,rgba(10,40,72,.25),transparent 35%,rgba(99,25,23,.14) 75%,rgba(20,92,47,.18))}
+
+/* Navegação Principal */
+.main-nav{position:sticky;top:0;z-index:100;background:linear-gradient(90deg,rgba(9,22,35,.96),rgba(25,12,15,.9));border-bottom:1px solid rgba(201,182,95,.18);padding:12px clamp(16px,4vw,54px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.eye{width:44px;height:32px;flex-shrink:0;color:var(--gold)}
+.nav-brand span{font-size:clamp(18px,2.5vw,26px);letter-spacing:.12em;color:#c8b968;font-weight:650}
+.nav-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab-btn{padding:8px 16px;border-radius:8px;background:transparent;border:1px solid transparent;color:var(--muted);font-size:14px;letter-spacing:.06em;transition:.25s}
+.tab-btn.active{background:rgba(34,229,154,.12);border-color:rgba(34,229,154,.4);color:var(--green)}
+.tab-btn:hover{border-color:rgba(201,182,95,.3);color:var(--gold)}
+
+/* Seções */
+.section{display:none;animation:fadeIn .4s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ===== ESTILOS DO PAINEL GLOBAL ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px clamp(16px,4vw,54px);border-bottom:1px solid rgba(201,182,95,.18);position:relative;z-index:5}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-name{font-size:clamp(20px,3vw,31px);letter-spacing:.12em;color:#c8b968;font-weight:650;line-height:1.1}
+.brand-sub{font-size:10px;letter-spacing:.29em;color:#a99c64;margin-top:8px;white-space:nowrap}
+.brand-tagline{font-size:10px;letter-spacing:.24em;color:#45515b;margin-top:8px}
+.header-actions{display:flex;gap:10px;align-items:center}
+.pill{border:1px solid rgba(201,182,95,.22);border-radius:999px;padding:11px 15px;background:rgba(16,28,30,.7);font-size:12px;letter-spacing:.12em;color:#c7b45e;white-space:nowrap}
+.pill.live{color:var(--green);border-color:rgba(34,229,154,.3)}
+.pill.live span{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:8px;box-shadow:0 0 10px var(--green)}
+main{max-width:1600px;margin:auto;padding:22px clamp(12px,2.5vw,36px) 28px}
+.status-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.eyebrow{font-size:10px;letter-spacing:.25em;color:#657e80;text-transform:uppercase}
+.status-right{font-size:11px;color:var(--green);letter-spacing:.12em}
+.dashboard{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:stretch}
+.map-panel{height:min(70vh,760px);min-height:490px;position:relative;overflow:hidden;border:1px solid rgba(49,213,220,.18);border-radius:20px;background:radial-gradient(ellipse at 50% 53%,rgba(13,70,69,.23),rgba(4,10,17,.7) 65%);box-shadow:inset 0 0 80px rgba(20,172,130,.05),0 20px 60px #0005}
+#globe{width:100%;height:100%;display:block}
+.map-top{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;gap:10px}
+.map-label{font-size:11px;letter-spacing:.17em;color:#9ab8b0;text-transform:uppercase}
+.map-label small{display:block;margin-top:6px;color:#4f7774;letter-spacing:.1em}
+.live-dot{color:var(--green);font-size:10px;letter-spacing:.12em}
+.map-controls{position:absolute;right:16px;bottom:18px;display:grid;gap:8px}
+.map-controls button{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:rgba(7,21,25,.8);font-size:20px;color:#8ca9a1}
+.map-controls button:hover,.nav-btn:hover{border-color:var(--green);color:var(--green)}
+.map-legend{position:absolute;left:18px;bottom:18px;display:flex;flex-wrap:wrap;gap:12px;font-size:10px;color:#79918d;background:rgba(4,13,18,.72);padding:10px 12px;border:1px solid #1c3939;border-radius:10px}
+.legend-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px}
+.sidebar{display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(12px)}
+.panel-title{display:flex;align-items:center;justify-content:space-between;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#91aaa2;margin-bottom:14px}
+.panel-title b{font-weight:500;color:var(--green);font-size:9px}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(100,155,144,.12);gap:8px}
+.metric:last-child{border:0;padding-bottom:0}
+.metric-name{font-size:12px;color:#90a9a2}
+.metric-value{font-size:18px;color:#d9f9ed;font-variant-numeric:tabular-nums}
+.metric-value em{font-size:10px;color:var(--green);font-style:normal;margin-left:4px}
+.feed{display:grid;gap:12px}
+.feed-item{display:grid;grid-template-columns:7px 1fr;gap:10px;align-items:start}
+.feed-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;background:var(--gold);box-shadow:0 0 9px currentColor}
+.feed-item strong{display:block;font-size:11px;font-weight:550;color:#d4e6de;line-height:1.4}
+.feed-item small{display:block;font-size:10px;color:#617e78;margin-top:4px;line-height:1.4}
+.feed-dot.green{background:var(--green)}
+.feed-dot.cyan{background:var(--cyan)}
+.feed-dot.orange{background:#ff8c50}
+.bottom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.mini-card{border:1px solid var(--line);border-radius:14px;padding:15px;background:linear-gradient(135deg,rgba(9,29,32,.86),rgba(8,14,22,.82));min-width:0}
+.mini-label{font-size:9px;color:#6f9089;letter-spacing:.16em;text-transform:uppercase}
+.mini-number{font-size:23px;margin-top:8px;color:#e1f8ed;font-variant-numeric:tabular-nums}
+.mini-number span{font-size:10px;color:var(--green);margin-left:6px}
+.mini-note{font-size:10px;color:#637b77;margin-top:5px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.nav-btn{border:1px solid rgba(49,213,220,.15);background:rgba(7,20,24,.72);border-radius:10px;padding:10px 14px;color:#7f9b95;font-size:11px;letter-spacing:.08em}
+.nav-btn.active{background:rgba(22,111,85,.24);border-color:rgba(34,229,154,.5);color:var(--green)}
+.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 4px 0;color:#46645f;font-size:9px;letter-spacing:.12em}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#0d2924;border:1px solid #1c7558;color:#b9ffe2;padding:11px 16px;border-radius:10px;font-size:12px;transition:.25s;z-index:1000}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== ESTILOS DA CARTEIRA WEB3 ===== */
+.wallet-container{max-width:1200px;margin:0 auto;padding:2rem;text-align:center}
+.wallet-container h1{font-size:2.5rem;margin-bottom:1rem}
+.wallet-container h1 span{color:var(--yellow)}
+.wallet-container p{color:#B7BDC6;font-size:1.1rem;margin-bottom:2rem;max-width:600px;margin-left:auto;margin-right:auto}
+.wallet-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.btn{padding:0.875rem 2rem;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:0.3s}
+.btn-primary{background:var(--yellow);color:#000}
+.btn-primary:hover{background:#e6ac1a;transform:translateY(-1px)}
+.btn-secondary{background:var(--card);color:#fff;border:1px solid #474D57}
+.btn-secondary:hover{border-color:var(--yellow);transform:translateY(-1px)}
+.wallet-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+.wallet-card{background:var(--card);padding:1.5rem;border-radius:10px;border:1px solid var(--card-border);text-align:left;transition:.25s}
+.wallet-card:hover{border-color:rgba(243,186,47,.3);transform:translateY(-3px)}
+.wallet-card h3{color:var(--yellow);margin-bottom:0.5rem}
+.wallet-card p{color:#B7BDC6;font-size:0.95rem;margin:0}
+.warning{background:rgba(243,186,47,0.08);border:1px solid var(--yellow);padding:1.25rem;border-radius:8px;margin-top:2.5rem;text-align:left;max-width:720px;margin-left:auto;margin-right:auto}
+.warning strong{color:var(--yellow)}
+
+/* ===== RESPONSIVIDADE ===== */
+@media(max-width:950px){
+.dashboard{grid-template-columns:1fr}
+.map-panel{height:58vh;min-height:430px}
+.sidebar{display:grid;grid-template-columns:1fr 1fr}
+.bottom-grid{grid-template-columns:repeat(2,1fr)}
+.brand-tagline{display:none}
+}
+@media(max-width:640px){
+.main-nav{flex-direction:column;gap:12px;text-align:center}
+.nav-tabs{justify-content:center;width:100%}
+.tab-btn{padding:6px 12px;font-size:13px}
+.wallet-container h1{font-size:1.8rem}
+.wallet-buttons{flex-direction:column;align-items:stretch}
+.btn{width:100%}
+}
+@media(max-width:560px){
+.topbar{padding:16px 14px;align-items:flex-start}
+.eye{width:39px}
+.brand{gap:8px}
+.brand-name{font-size:20px;letter-spacing:.08em}
+.brand-sub{font-size:8px;letter-spacing:.16em}
+.header-actions{gap:6px}
+.pill{padding:9px 10px;font-size:9px}
+.pill.support{display:none}
+main{padding:14px 10px 22px}
+.status-row{align-items:flex-start;flex-wrap:wrap;gap:4px}
+.status-right{font-size:9px;text-align:right}
+.map-panel{min-height:440px;height:56vh;border-radius:14px}
+.map-top{top:13px;left:13px;right:13px}
+.map-label{font-size:9px}
+.map-legend{left:10px;bottom:10px;gap:8px;font-size:9px;padding:8px}
+.map-controls{right:10px;bottom:70px}
+.map-controls button{width:34px;height:34px}
+.sidebar{grid-template-columns:1fr}
+.panel{padding:14px}
+.feed{grid-template-columns:1fr 1fr;gap:13px}
+.bottom-grid{gap:8px}
+.mini-card{padding:12px}
+.mini-number{font-size:20px}
+.toolbar{gap:6px}
+.nav-btn{padding:9px 10px;font-size:10px}
+.footer{font-size:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- Barra de Navegação Principal -->
+<nav class="main-nav">
+  <a href="#" class="nav-brand">
+    <svg class="eye" viewBox="0 0 100 60" fill="none" aria-hidden="true">
+      <path d="M5 30C24 8 55 7 82 23L96 25 82 30C58 49 27 48 5 30Z" stroke="currentColor" stroke-width="2.6"/>
+      <path d="M10 30C31 23 53 22 74 29C57 36 33 38 10 30Z" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="42" cy="29" r="8" stroke="currentColor" stroke-width="2"/>
+      <circle cx="42" cy="29" r="3" fill="currentColor"/>
+      <path d="M14 12L26 17M14 48L27 43M77 14L89 17" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <span>rv.web3</span>
+  </a>
+  <div class="nav-tabs">
+    <button class="tab-btn active" data-section="dashboard">🌐 Painel Global</button>
+    <button class="tab-btn" data-section="wallet">💰 Carteira Web3</button>
+  </div>
+</nav>
+
+<!-- ===== SEÇÃO: PAINEL GLOBAL ===== -->
+<section id="dashboard" class="section active">
+  <header class="topbar">
+    <div class="brand">
+      <div>
+        <div class="brand-name">rv.web3</div>
+        <div class="brand-sub">INTELIGÊNCIA DE CÓDIGO ABERTO</div>
+        <div class="brand-tagline">MONITORAMENTO GLOBAL EM TEMPO REAL</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="pill live" id="tokenBtn"><span></span>rv.web3</button>
+      <button class="pill support" id="supportBtn">● SUPORTE⌄</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="status-row">
+      <div class="eyebrow">Painel de inteligência global / Terra</div>
+      <div class="status-right">● SISTEMAS OPERACIONAIS</div>
+    </div>
+    <section class="dashboard">
+      <div class="map-panel">
+        <canvas id="globe" aria-label="Globo interativo com eventos globais"></canvas>
+        <div class="map-top">
+          <div class="map-label">Visualização planetária
+            <small>CAMADA DE DADOS • ATUALIZAÇÃO CONTÍNUA</small>
+          </div>
+          <div class="live-dot">● LIVE</div>
+        </div>
+        <div class="map-controls">
+          <button id="zoomIn" aria-label="Aumentar zoom">+</button>
+          <button id="zoomOut" aria-label="Diminuir zoom">−</button>
+          <button id="rotateBtn" aria-label="Pausar rotação">Ⅱ</button>
+        </div>
+        <div class="map-legend">
+          <span><i class="legend-dot" style="background:#27e69a"></i>Dados</span>
+          <span><i class="legend-dot" style="background:#31d5dc"></i>Conexões</span>
+          <span><i class="legend-dot" style="background:#ff9a42"></i>Alertas</span>
+          <span><i class="legend-dot" style="background:#d3c15c"></i>Eventos</span>
+        </div>
+      </div>
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="panel-title">Telemetria global <b>● ONLINE</b></div>
+          <div class="metric"><span class="metric-name">Nós observados</span><span class="metric-value" id="nodes">8.492<em>+2.4%</em></span></div>
+          <div class="metric"><span class="metric-name">Sinais ativos</span><span class="metric-value" id="signals">2.716</span></div>
+          <div class="metric"><span class="metric-name">Regiões monitoradas</span><span class="metric-value">194</span></div>
+          <div class="metric"><span class="metric-name">Latência média</span><span class="metric-value">42<em>ms</em></span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Feed de observação <b>AO VIVO</b></div>
+          <div class="feed">
+            <div class="feed-item"><i class="feed-dot green"></i><div><strong>Atividade de dados detectada</strong><small>América do Sul · agora</small></div></div>
+            <div class="feed-item"><i class="feed-dot orange"></i><div><strong>Anomalia atmosférica</strong><small>Atlântico Norte · 2 min</small></div></div>
+            <div class="feed-item"><i class="feed-dot cyan"></i><div><strong>Conexão global estabilizada</strong><small>Europa · 5 min</small></div></div>
+            <div class="feed-item"><i class="feed-dot"></i><div><strong>Evento sísmico monitorado</strong><small>Pacífico · 8 min</small></div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Camadas de dados <b>4 ATIVAS</b></div>
+          <div class="toolbar" style="margin-top:0">
+            <button class="nav-btn active" data-layer="nodes">Nós</button>
+            <button class="nav-btn active" data-layer="links">Conexões</button>
+            <button class="nav-btn active" data-layer="alerts">Alertas</button>
+            <button class="nav-btn active" data-layer="events">Eventos</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+    <section class="bottom-grid">
+      <div class="mini-card"><div class="mini-label">Tráfego observado</div><div class="mini-number">1.84 <span>TB/s</span></div><div class="mini-note">Fluxo agregado estimado</div></div>
+      <div class="mini-card"><div class="mini-label">Eventos detectados</div><div class="mini-number" id="events">1.286 <span>+8.1%</span></div><div class="mini-note">Janela de observação atual</div></div>
+      <div class="mini-card"><div class="mini-label">Cobertura de rede</div><div class="mini-number">98.7<span>%</span></div><div class="mini-note">Disponibilidade dos coletores</div></div>
+      <div class="mini-card"><div class="mini-label">Última sincronização</div><div class="mini-number" id="clock">--:--:--</div><div class="mini-note">Relógio local do dispositivo</div></div>
+    </section>
+    <div class="toolbar">
+      <button class="nav-btn active" data-mode="global">◎ Visão global</button>
+      <button class="nav-btn" data-mode="network">⌘ Rede de dados</button>
+      <button class="nav-btn" data-mode="events">✳ Eventos</button>
+      <button class="nav-btn" data-mode="night">☾ Modo noturno</button>
+    </div>
+    <footer class="footer">
+      <span>rv.web3 · INTERFACE DEMONSTRATIVA</span>
+      <span>VISUALIZAÇÃO ILUSTRATIVA · NÃO REPRESENTA DADOS VERIFICADOS EM TEMPO REAL</span>
+    </footer>
+  </main>
+</section>
+
+<!-- ===== SEÇÃO: CARTEIRA WEB3 ===== -->
+<section id="wallet" class="section">
+  <div class="wallet-container">
+    <h1>Bem-vindo à sua <span>Carteira Web3</span></h1>
+    <p>Interface profissional segura, rápida e conectada com todo o ecossistema Web3. Suas chaves nunca saem do seu dispositivo.</p>
+
+    <div class="wallet-buttons">
+      <button class="btn btn-primary" onclick="criarCarteira()">✨ Criar Carteira</button>
+      <button class="btn btn-secondary" onclick="importarFrase()">🔑 Importar com 12 Palavras</button>
+      <button class="btn btn-secondary" onclick="importarChave()">🔒 Importar com Chave Privada</button>
+      <button class="btn btn-secondary" onclick="conectarMetaMask()">🦊 Conectar MetaMask</button>
+      <button class="btn btn-secondary" onclick="conectarBinance()">🟡 Conectar Binance Web3</button>
+      <button class="btn btn-secondary" onclick="conectarTrust()">💙 Conectar Trust Wallet</button>
+    </div>
+
+    <div class="wallet-features">
+      <div class="wallet-card">
+        <h3>🔑 Importação Segura</h3>
+        <p>Use frase de 12 palavras ou chave privada para acessar sua carteira com total controle sobre seus dados.</p>
+      </div>
+      <div class="wallet-card">
+        <h3>🔗 Multiplataforma</h3>
+        <p>Conecte com MetaMask, Binance Web3, Trust Wallet e outras carteiras compatíveis com padrões Web3.</p>
+      </div>
+      <div class="wallet-card">
+        <h3>🛡️ Segurança Total</h3>
+        <p>Suas chaves nunca saem do seu dispositivo. Tudo processado localmente — nenhum servidor central.</p>
+      </div>
+      <div class="wallet-card">
+        <h3>💱 Enviar e Receber</h3>
+        <p>Transfira e receba criptoativos em diversas redes com rapidez e taxas transparentes.</p>
+      </div>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ AVISO DE SEGURANÇA:</strong> Nunca compartilhe sua frase de 12 palavras ou chave privada com ninguém! Perdas por vazamento são irreversíveis. Armazene em local seguro e offline. Nossa interface nunca solicita esses dados fora do seu dispositivo.
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+</div>
+
+<!-- Importação do Ethers.js via CDN (versão 6) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.1/ethers.umd.min.js"></script>
+
+<script>
+// ===== NAVEGAÇÃO ENTRE ABAS =====
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const sectionId=btn.dataset.section;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===sectionId));
+    if(sectionId==='dashboard') setTimeout(resize,100);
+  });
+});
+
+// ===== FUNÇÕES GLOBAIS =====
+function toast(msg){
+  let t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ===== LÓGICA DO PAINEL GLOBAL =====
+const canvas=document.getElementById('globe');
+const ctx=canvas.getContext('2d');
+let w=0,h=0,scale=1,angle=0,paused=false;
+let layerState={nodes:true,links:true,alerts:true,events:true};
+let mode='global',raf;
+
+function resize(){
+  const container=canvas.closest('.map-panel');
+  if(!container) return;
+  const r=container.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(1,Math.floor(r.width*dpr));
+  canvas.height=Math.max(1,Math.floor(r.height*dpr));
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  w=r.width;
+  h=r.height;
+}
+
+function randFactory(seed){
+  return ()=>{
+    seed=(seed*1664525+1013904223)>>>0;
+    return seed/4294967296;
+  };
+}
+const rand=randFactory(8291);
+const dots=Array.from({length:2600},()=>({
+  lat:(rand()-.5)*Math.PI,
+  lon:rand()*Math.PI*2,
+  size:.35+rand()*1.1,
+  c:rand()
+}));
+const events=Array.from({length:95},()=>({
+  lat:(rand()-.5)*2.55,
+  lon:rand()*Math.PI*2,
+  r:2+rand()*4,
+  c:rand()
+}));
+
+function project(lat,lon,cx,cy,R){
+  lon+=angle;
+  const x=Math.cos(lat)*Math.sin(lon);
+  const y=Math.sin(lat);
+  const z=Math.cos(lat)*Math.cos(lon);
+  return{x:cx+x*R,y:cy-y*R,z};
+}
+
+function draw(){
+  if(!ctx) return;
+  ctx.clearRect(0,0,w,h);
+  let R=Math.min(w*.43,h*.37)*scale;
+  let cx=w*.5,cy=h*.53;
+  const bg=ctx.createRadialGradient(cx-R*.25,cy-R*.35,R*.04,cx,cy,R*1.25);
+  bg.addColorStop(0,'rgba(22,83,91,.42)');
+  bg.addColorStop(.65,'rgba(6,34,43,.45)');
+  bg.addColorStop(1,'rgba(2,8,15,.05)');
+  ctx.fillStyle=bg;
+  ctx.beginPath();
+  ctx.arc(cx,cy,R*1.02,0,Math.PI*2);
+  ctx.fill();
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.clip();
+  ctx.strokeStyle='rgba(53,199,174,.13)';
+  ctx.lineWidth=.6;
+  for(let i=-4;i<=4;i++){
+    let rx=R*Math.sqrt(Math.max(0,1-(i/5)**2));
+    ctx.beginPath();
+    ctx.ellipse(cx,cy+i*R/5,rx,Math.max(1,rx*.16),0,0,Math.PI*2);
+    ctx.stroke();
+  }
+  for(let i=0;i<8;i++){
+    ctx.beginPath();
+    ctx.ellipse(cx,cy,R*Math.abs(Math.sin(i*Math.PI/8)),R,0,0,Math.PI*2);
+    ctx.stroke();
+  }
+  const land=[
+    {lat:.72,lon:4.0,sx:.65,sy:.32},
+    {lat:.15,lon:4.45,sx:.32,sy:.65},
+    {lat:-.48,lon:5.45,sx:.25,sy:.53},
+    {lat:.78,lon:1.1,sx:.52,sy:.23},
+    {lat:.25,lon:1.9,sx:.33,sy:.4},
+    {lat:-.22,lon:2.1,sx:.25,sy:.4},
+    {lat:.05,lon:3.0,sx:.23,sy:.25}
+  ];
+  for(const p of dots){
+    let near=0;
+    for(const l of land){
+      let dl=Math.atan2(Math.sin(p.lon-l.lon),Math.cos(p.lon-l.lon));
+      let d=(dl/l.sx)**2+((p.lat-l.lat)/l.sy)**2;
+      if(d<1)near=Math.max(near,1-d);
+    }
+    if(near<=0)continue;
+    const q=project(p.lat,p.lon,cx,cy,R);
+    if(q.z<0)continue;
+    let col=p.c>.88?'#ff9a42':p.c>.63?'#27e69a':p.c>.35?'#26b7bd':'#7c9a91';
+    ctx.globalAlpha=(.18+near*.72)*(.35+q.z*.65);
+    ctx.fillStyle=col;
+    ctx.beginPath();
+    ctx.arc(q.x,q.y,p.size*(.6+near),0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  if(layerState.links){
+    ctx.lineWidth=.55;
+    for(let i=0;i<75;i++){
+      const a=dots[(i*31+5)%dots.length];
+      const b=dots[(i*67+80)%dots.length];
+      const p=project(a.lat,a.lon,cx,cy,R);
+      const q=project(b.lat,b.lon,cx,cy,R);
+      if(p.z>.15&&q.z>.15){
+        ctx.strokeStyle='rgba(42,218,181,.2)';
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(q.x,q.y);
+        ctx.stroke();
+      }
+    }
+  }
+  if(layerState.nodes){
+    for(let i=0;i<dots.length;i+=5){
+      let p=project(dots[i].lat,dots[i].lon,cx,cy,R);
+      if(p.z>.05){
+        ctx.fillStyle='rgba(34,229,154,'+(.12+p.z*.42)+')';
+        ctx.fillRect(p.x,p.y,1.1,1.1);
+      }
+    }
+  }
+  if(layerState.alerts){
+    for(let i=0;i<events.length;i+=3){
+      let e=events[i];
+      let p=project(e.lat,e.lon,cx,cy,R);
+      if(p.z>.1&&e.c>.43){
+        ctx.fillStyle=e.c>.8?'#ff9a42':'#d3c15c';
+        ctx.globalAlpha=.8;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,e.r*(.65+p.z*.5),0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha=1;
+      }
+    }
+  }
+  if(layerState.events){
+    for(let i=2;i<events.length;i+=11){
+      let e=events[i];
+      let p=project(e.lat,e.lon,cx,cy,R);
+      if(p.z>.1){
+        ctx.strokeStyle='rgba(255,160,68,.75)';
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,5+Math.sin(Date.now()/500+i)*2,0,Math.PI*2);
+        ctx.stroke();
+      }
+    }
+  }
+  const edge=ctx.createRadialGradient(cx,cy,R*.78,cx,cy,R*1.02);
+  edge.addColorStop(0,'rgba(0,0,0,0)');
+  edge.addColorStop(.8,'rgba(0,0,0,0)');
+  edge.addColorStop(1,'rgba(0,0,0,.6)');
+  ctx.fillStyle=edge;
+  ctx.fillRect(cx-R,cy-R,R*2,R*2);
+  ctx.restore();
+  ctx.strokeStyle='rgba(47,207,177,.45)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.stroke();
+  for(let i=0;i<220;i++){
+    let a=i*2.39996+angle*.16;
+    let rr=R*(1.04+(i%7)*.006);
+    let x=cx+Math.cos(a)*rr;
+    let y=cy+Math.sin(a)*rr*.88;
+    ctx.fillStyle=i%6===0?'rgba(49,213,220,.65)':'rgba(34,229,154,.45)';
+    ctx.fillRect(x,y,1.4,1.4);
+  }
+  if(!paused)angle+=.0018;
+  raf=requestAnimationFrame(draw);
+}
+
+document.querySelectorAll('[data-layer]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    let k=b.dataset.layer;
+    layerState[k]=!layerState[k];
+    b.classList.toggle('active',layerState[k]);
+    b.setAttribute('aria-pressed',layerState[k]);
+    toast((layerState[k]?'Camada ativada: ':'Camada ocultada: ')+k);
+  });
+});
+
+document.querySelectorAll('[data-mode]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    mode=b.dataset.mode;
+    if(mode==='network'){
+      layerState.links=true;
+      layerState.nodes=true;
+    }else if(mode==='events'){
+      layerState.events=true;
+      layerState.alerts=true;
+    }else if(mode==='night'){
+      document.body.style.filter='saturate(.72) brightness(.82)';
+    }else{
+      document.body.style.filter='';
+    }
+    document.querySelectorAll('[data-layer]').forEach(x=>{
+      x.classList.toggle('active',layerState[x.dataset.layer]);
+    });
+    toast('Visualização: '+b.textContent.trim());
+  });
+});
+
+document.getElementById('zoomIn').onclick=()=>{
+  scale=Math.min(1.45,scale+.1);
+  toast('Zoom aproximado');
+};
+document.getElementById('zoomOut').onclick=()=>{
+  scale=Math.max(.7,scale-.1);
+  toast('Zoom afastado');
+};
+document.getElementById('rotateBtn').onclick=e=>{
+  paused=!paused;
+  e.currentTarget.textContent=paused?'▶':'Ⅱ';
+  toast(paused?'Rotação pausada':'Rotação ativada');
+};
+
+document.getElementById('tokenBtn').onclick=()=>{
+  toast('Painel rv.web3 demonstrativo');
+};
+document.getElementById('supportBtn').onclick=()=>{
+  toast('Central de suporte — configure seu canal de atendimento');
+};
+
+function clock(){
+  let d=new Date();
+  const timeStr=d.toLocaleTimeString('pt-BR',{hour12:false});
+  const clockEl=document.getElementById('clock');
+  if(clockEl) clockEl.textContent=timeStr;
+  const signalsEl=document.getElementById('signals');
+  if(signalsEl) signalsEl.textContent=(2700+Math.floor(Math.random()*40)).toLocaleString('pt-BR');
+  const nodesEl=document.getElementById('nodes');
+  if(nodesEl) nodesEl.innerHTML=(8450+Math.floor(Math.random()*80)).toLocaleString('pt-BR')+'<em>+2.4%</em>';
+}
+setInterval(clock,3000);
+
+if('ResizeObserver' in window){
+  const obs=new ResizeObserver(entries=>{if(canvas.isConnected) resize();});
+  obs.observe(canvas);
+}else{
+  window.addEventListener('resize',resize);
+}
+setTimeout(()=>{resize();draw();clock();},60);
+
+
+// ===== INTEGRAÇÃO REAL WEB3 COM ETHERS.JS =====
+
+let provider;
+let signer;
+let userAddress = null;
+
+async function conectarMetaMask() {
+  if (typeof window.ethereum === 'undefined') {
+    toast('⚠️ MetaMask não encontrada! Instale a extensão no navegador.');
+    alert('MetaMask não detectada. Por favor, instale a extensão MetaMask para continuar.');
+    return;
+  }
+
+  try {
+    toast('🦊 Solicitando acesso ao MetaMask...');
+    
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
+    
+    const balanceWei = await provider.getBalance(userAddress);
+    const balanceEther = ethers.formatEther(balanceWei);
+    const network = await provider.getNetwork();
+
+    toast('✅ Conectado com sucesso!');
+    atualizarInterfaceCarteiraConectada(userAddress, balanceEther, network.name);
+
+  } catch (error) {
+    console.error(error);
+    toast('❌ Falha ao conectar carteira.');
+  }
+}
+
+function atualizarInterfaceCarteiraConectada(address, balance, networkName) {
+  const container = document.querySelector('.wallet-container');
+  
+  container.innerHTML = `
+    <h1><span>Carteira Conectada</span></h1>
+    <p>Conectado via MetaMask com segurança em tempo real.</p>
+    
+    <div class="wallet-card" style="max-width: 500px; margin: 0 auto 2rem auto; text-align: left;">
+      <h3>📌 Endereço:</h3>
+      <p style="word-break: break-all; color: var(--yellow);">${address}</p>
+      <br>
+      <h3>💰 Saldo Nativo:</h3>
+      <p style="font-size: 1.2rem; color: #fff;">${parseFloat(balance).toFixed(4)} (Rede: ${networkName})</p>
+    </div>
+
+    <div class="wallet-buttons">
+      <button class="btn btn-primary" onclick="desconectarCarteira()">🔌 Desconectar</button>
+      <button class="btn btn-secondary" onclick="toast('Funcionalidade de envio em breve')">💸 Enviar Fundos</button>
+    </div>
+  `;
+}
+
+function desconectarCarteira() {
+  userAddress = null;
+  signer = null;
+  provider = null;
+  toast('Carteira desconectada');
+  window.location.reload();
+}
+
+function criarCarteira() { toast('🔐 Para gerar uma nova carteira offline, utilize geradores de chaves seguros.'); }
+function importarFrase() { toast('🔑 Funcionalidade de importação por frase requer gerenciador seguro.'); }
+function importarChave() { toast('🔒 Insira sua chave privada com cautela em ambiente isolado.'); }
+function conectarBinance() { toast('🟡 Conectando Binance Web3 Wallet...'); }
+function conectarTrust() { toast('💙 Conectando Trust Wallet...'); }
+</script>
+</body>
+</html>
+
