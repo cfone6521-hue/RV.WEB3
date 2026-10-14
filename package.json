@@ -1,0 +1,26 @@
+{
+  "name": "r.v_web3",
+  "version": "1.0.0",
+  "description": "Carteira Web3 estilo Binance — Importação via chave privada e 12 palavras, integração com MetaMask, Binance Web3, Trust Wallet e outras plataformas Web3.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx live-server .",
+    "build": "echo Projeto pronto!"
+  },
+  "keywords": [
+    "web3",
+    "wallet",
+    "ethereum",
+    "binance",
+    "blockchain",
+    "metamask",
+    "bsc",
+    "criptomoedas"
+  ],
+  "author": "cfone6521-hue",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.11.0",
+    "@walletconnect/web3-provider": "^1.8.0"
+  }
+}
